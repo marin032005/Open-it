@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Slider with Music & Dots</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #000;
+        }
+
+        /* Slider container */
+        .slider {
+            display: flex;
+            width: 700%; /* 7 slides */
+            height: 100vh;
+            transition: transform 0.8s ease-in-out;
+        }
+
+        /* Individual slides */
+        .slide {
+            flex: 0 0 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Navigation buttons */
+        .nav-buttons {
+            position: fixed;
+            bottom: 60px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 20px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        /* Music player */
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 15px;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        #music-progress {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            width: 150px;
+            height: 5px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #music-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #ffd43b;
+            transition: width 0.1s linear;
+        }
+
+        /* Dots navigation */
+        .dots {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: #ffd43b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slider -->
+    <div class="slider" id="slider">
+        <div class="slide"><img src="slide1.jpg" alt="Slide 1"></div>
+        <div class="slide"><img src="slide2.jpg" alt="Slide 2"></div>
+        <div class="slide"><img src="slide3.jpg" alt="Slide 3"></div>
+        <div class="slide"><img src="slide4.jpg" alt="Slide 4"></div>
+        <div class="slide"><img src="slide5.jpg" alt="Slide 5"></div>
+        <div class="slide"><img src="slide6.jpg" alt="Slide 6"></div>
+        <div class="slide"><img src="slide7.jpg" alt="Slide 7"></div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button onclick="prevSlide()">Previous</button>
+        <button onclick="nextSlide()">Next</button>
+    </div>
+
+    <!-- Dots Navigation -->
+    <div class="dots" id="dots"></div>
+
+    <!-- Music Player -->
+    <div id="music-control" onclick="toggleMusic()">🎵</div>
+    <div id="music-progress"><div id="music-progress-bar"></div></div>
+    <audio id="background-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        let currentSlide = 0;
+        const slider = document.getElementById('slider');
+        const totalSlides = slider.children.length;
+        const music = document.getElementById('background-music');
+        const progressBar = document.getElementById('music-progress-bar');
+        const dotsContainer = document.getElementById('dots');
+
+        // Create dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if(i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+        const dots = document.querySelectorAll('.dot');
+
+        function updateDots() {
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[currentSlide].classList.add('active');
+        }
+
+        function showSlide(index) {
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            currentSlide = index;
+            updateDots();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        // Auto slide every 5 seconds
+        setInterval(nextSlide, 5000);
+
+        // Swipe support
+        let startX = 0;
+        slider.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        slider.addEventListener('touchend', e => {
+            let endX = e.changedTouches[0].clientX;
+            if (startX - endX > 50) nextSlide();
+            if (endX - startX > 50) prevSlide();
+        });
+
+        function toggleMusic() {
+            if (music.paused) music.play();
+            else music.pause();
+        }
+
+        // Music progress
+        music.addEventListener('timeupdate', () => {
+            const percent = (music.currentTime / music.duration) * 100;
+            progressBar.style.width = percent + '%';
+        });
+    </script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Slider with Music & Dots</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #000;
+        }
+
+        /* Slider container */
+        .slider {
+            display: flex;
+            width: 700%; /* 7 slides */
+            height: 100vh;
+            transition: transform 0.8s ease-in-out;
+        }
+
+        /* Individual slides */
+        .slide {
+            flex: 0 0 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Navigation buttons */
+        .nav-buttons {
+            position: fixed;
+            bottom: 60px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 20px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        /* Music player */
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 15px;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        #music-progress {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            width: 150px;
+            height: 5px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #music-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #ffd43b;
+            transition: width 0.1s linear;
+        }
+
+        /* Dots navigation */
+        .dots {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: #ffd43b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slider -->
+    <div class="slider" id="slider">
+        <div class="slide"><img src="slide1.jpg" alt="Slide 1"></div>
+        <div class="slide"><img src="slide2.jpg" alt="Slide 2"></div>
+        <div class="slide"><img src="slide3.jpg" alt="Slide 3"></div>
+        <div class="slide"><img src="slide4.jpg" alt="Slide 4"></div>
+        <div class="slide"><img src="slide5.jpg" alt="Slide 5"></div>
+        <div class="slide"><img src="slide6.jpg" alt="Slide 6"></div>
+        <div class="slide"><img src="slide7.jpg" alt="Slide 7"></div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button onclick="prevSlide()">Previous</button>
+        <button onclick="nextSlide()">Next</button>
+    </div>
+
+    <!-- Dots Navigation -->
+    <div class="dots" id="dots"></div>
+
+    <!-- Music Player -->
+    <div id="music-control" onclick="toggleMusic()">🎵</div>
+    <div id="music-progress"><div id="music-progress-bar"></div></div>
+    <audio id="background-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        let currentSlide = 0;
+        const slider = document.getElementById('slider');
+        const totalSlides = slider.children.length;
+        const music = document.getElementById('background-music');
+        const progressBar = document.getElementById('music-progress-bar');
+        const dotsContainer = document.getElementById('dots');
+
+        // Create dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if(i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+        const dots = document.querySelectorAll('.dot');
+
+        function updateDots() {
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[currentSlide].classList.add('active');
+        }
+
+        function showSlide(index) {
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            currentSlide = index;
+            updateDots();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        // Auto slide every 5 seconds
+        setInterval(nextSlide, 5000);
+
+        // Swipe support
+        let startX = 0;
+        slider.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        slider.addEventListener('touchend', e => {
+            let endX = e.changedTouches[0].clientX;
+            if (startX - endX > 50) nextSlide();
+            if (endX - startX > 50) prevSlide();
+        });
+
+        function toggleMusic() {
+            if (music.paused) music.play();
+            else music.pause();
+        }
+
+        // Music progress
+        music.addEventListener('timeupdate', () => {
+            const percent = (music.currentTime / music.duration) * 100;
+            progressBar.style.width = percent + '%';
+        });
+    </script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Slider with Music & Dots</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #000;
+        }
+
+        /* Slider container */
+        .slider {
+            display: flex;
+            width: 700%; /* 7 slides */
+            height: 100vh;
+            transition: transform 0.8s ease-in-out;
+        }
+
+        /* Individual slides */
+        .slide {
+            flex: 0 0 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Navigation buttons */
+        .nav-buttons {
+            position: fixed;
+            bottom: 60px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 20px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        /* Music player */
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 15px;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        #music-progress {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            width: 150px;
+            height: 5px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #music-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #ffd43b;
+            transition: width 0.1s linear;
+        }
+
+        /* Dots navigation */
+        .dots {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: #ffd43b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slider -->
+    <div class="slider" id="slider">
+        <div class="slide"><img src="slide1.jpg" alt="Slide 1"></div>
+        <div class="slide"><img src="slide2.jpg" alt="Slide 2"></div>
+        <div class="slide"><img src="slide3.jpg" alt="Slide 3"></div>
+        <div class="slide"><img src="slide4.jpg" alt="Slide 4"></div>
+        <div class="slide"><img src="slide5.jpg" alt="Slide 5"></div>
+        <div class="slide"><img src="slide6.jpg" alt="Slide 6"></div>
+        <div class="slide"><img src="slide7.jpg" alt="Slide 7"></div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button onclick="prevSlide()">Previous</button>
+        <button onclick="nextSlide()">Next</button>
+    </div>
+
+    <!-- Dots Navigation -->
+    <div class="dots" id="dots"></div>
+
+    <!-- Music Player -->
+    <div id="music-control" onclick="toggleMusic()">🎵</div>
+    <div id="music-progress"><div id="music-progress-bar"></div></div>
+    <audio id="background-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        let currentSlide = 0;
+        const slider = document.getElementById('slider');
+        const totalSlides = slider.children.length;
+        const music = document.getElementById('background-music');
+        const progressBar = document.getElementById('music-progress-bar');
+        const dotsContainer = document.getElementById('dots');
+
+        // Create dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if(i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+        const dots = document.querySelectorAll('.dot');
+
+        function updateDots() {
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[currentSlide].classList.add('active');
+        }
+
+        function showSlide(index) {
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            currentSlide = index;
+            updateDots();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        // Auto slide every 5 seconds
+        setInterval(nextSlide, 5000);
+
+        // Swipe support
+        let startX = 0;
+        slider.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        slider.addEventListener('touchend', e => {
+            let endX = e.changedTouches[0].clientX;
+            if (startX - endX > 50) nextSlide();
+            if (endX - startX > 50) prevSlide();
+        });
+
+        function toggleMusic() {
+            if (music.paused) music.play();
+            else music.pause();
+        }
+
+        // Music progress
+        music.addEventListener('timeupdate', () => {
+            const percent = (music.currentTime / music.duration) * 100;
+            progressBar.style.width = percent + '%';
+        });
+    </script>
+
+</body>
+</html>
